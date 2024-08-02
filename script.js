@@ -20,6 +20,7 @@ let bullets = [];
 let aliens = [];
 let rightPressed = false;
 let leftPressed = false;
+let alienDirection = 1;  // 1 for right, -1 for left
 
 function createAliens() {
     for (let c = 0; c < alienColumnCount; c++) {
@@ -54,26 +55,34 @@ function drawAliens() {
 }
 
 function updateBullets() {
-    bullets.forEach((bullet, index) => {
+    bullets = bullets.filter(bullet => {
         bullet.y -= bulletSpeed;
-        if (bullet.y < 0) {
-            bullets.splice(index, 1);
-        }
+        return bullet.y > 0; // Remove bullets that are off-screen
     });
 }
 
 function updateAliens() {
+    let hitEdge = false;
+
     aliens.forEach(column => {
         column.forEach(alien => {
             if (alien.alive) {
-                alien.x += alienSpeed;
+                alien.x += alienDirection;
                 if (alien.x + alienWidth > canvas.width || alien.x < 0) {
-                    alienSpeed = -alienSpeed;
-                    aliens.forEach(col => col.forEach(a => a.y += alienHeight));
+                    hitEdge = true;
                 }
             }
         });
     });
+
+    if (hitEdge) {
+        alienDirection = -alienDirection;
+        aliens.forEach(column => {
+            column.forEach(alien => {
+                alien.y += alienHeight;
+            });
+        });
+    }
 }
 
 function collisionDetection() {
@@ -131,3 +140,4 @@ document.addEventListener('keyup', keyUpHandler);
 
 createAliens();
 draw();
+
